@@ -4,21 +4,17 @@ from typing import *
 
 from seg_utils.utils.qt import colormap_rgb
 from seg_utils.ui.shape import Shape
-from seg_utils.ui.dialogs_new import NewLabelDialog
 
 
 class AnnotationGroup(QGraphicsObject):
     """ A group for managing annotation objects and their signals with a scene """
     item_highlighted = pyqtSignal(Shape)
     item_dehighlighted = pyqtSignal(Shape)
-    # item_clicked = pyqtSignal(Shape, QGraphicsSceneMouseEvent)
-    shapeCreated = pyqtSignal(list)
-    shapeSelected = pyqtSignal(int)
+    item_clicked = pyqtSignal(Shape, QGraphicsSceneMouseEvent)
 
     def __init__(self):
         QGraphicsObject.__init__(self)
         self.annotations = {}  # type: Dict[int, Shape]
-        self.classes = list()
         self.setAcceptHoverEvents(True)
         self.temp_shape: Shape = None
         self._num_colors = 10  # TODO: This needs to be updated based on what's in the image.
@@ -40,13 +36,6 @@ class AnnotationGroup(QGraphicsObject):
                                 color=self.draw_new_color)
         self.add_shapes(self.temp_shape)
         self.temp_shape.grabMouse()
-
-    def get_color_for_label(self, label_name: str):
-        r"""Get a Color based on a label_name"""
-        if label_name not in self.classes:
-            return None
-        label_index = self.classes.index(label_name)
-        return self.color_map[label_index]
 
     @pyqtSlot(int)
     def on_hover_enter(self, shape_id: int):
@@ -70,11 +59,9 @@ class AnnotationGroup(QGraphicsObject):
             self.annotations[new_id] = shape
             shape.hover_enter.connect(lambda: self.on_hover_enter(new_id))
             shape.hover_exit.connect(lambda: self.on_hover_leave(new_id))
-            # shape.clicked.connect(lambda x: self.item_clicked.emit(self.annotations[new_id], x))
-            shape.selected.connect(self.shape_selected)
+            shape.clicked.connect(lambda x: self.item_clicked.emit(self.annotations[new_id], x))
             shape.deleted.connect(lambda: self.remove_shapes(shape))
             shape.mode_changed.connect(self.shape_mode_changed)
-            shape.drawingDone.connect(self.set_label)
             self.update()
 
     def remove_shapes(self, shapes: Union[Shape, List[Shape]]):
@@ -100,53 +87,12 @@ class AnnotationGroup(QGraphicsObject):
         :return:
         """
         self.remove_shapes(list(self.annotations.values()))
-        self.temp_shape = None
-
-    def shape_selected(self):
-        """gets the index of the selected shape and emits it"""
-        shape = self.sender()
-        result = -1
-        for ann_id, ann in self.annotations.items():
-            if ann == shape:
-                result = ann_id
-            else:
-                ann.setSelected(False)
-        self.shapeSelected.emit(result)
-
-    def label_selected(self, idx: int):
-        """sets the annotation with the corresponding index selected"""
-        for annotation in self.annotations.values():
-            annotation.setSelected(False)
-        self.annotations[idx].setSelected(True)
 
     @pyqtSlot(int)
     def shape_mode_changed(self, mode: Union[int, Shape.ShapeMode]):
         shape = self.sender()  # type: Shape
         if mode == Shape.ShapeMode.FIXED:
-            shape.update_color(self.color_map[shape.group_id])
-
-    def set_label(self):
-        """
-        opens a dialog to let user enter a label
-        :return: None
-        """
-        dlg = NewLabelDialog(self.classes, self.color_map)
-        dlg.exec()
-        label = dlg.result
-
-        # set the label, add to classes if necessary
-        if label:
-            if label not in self.classes:
-                self.classes.append(label)
-            self.temp_shape.group_id = self.classes.index(label)
-            self.temp_shape.label = label
-            self.temp_shape.set_mode(Shape.ShapeMode.FIXED)
-            self.shapeCreated.emit(list(self.annotations.values()))
-
-        # if user entered no label, remove shape
-        else:
-            self.remove_shapes(self.temp_shape)
-            self.scene().removeItem(self.temp_shape)
+            shape.update_color(self.color_map[0])  # TODO: use label id for index
 
 
 if __name__ == '__main__':

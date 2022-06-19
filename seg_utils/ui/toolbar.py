@@ -1,21 +1,12 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-
 from typing import *
-from pathlib import Path
 
 from seg_utils.src.actions import Action
-from seg_utils.ui.dialogs_new import ProjectHandlerDialog, SelectPatientDialog
-from seg_utils.utils.project_structure import Structure, check_environment
 
 
 class Toolbar(QToolBar):
-
-    sCreateNewProject = pyqtSignal(str, dict)
-    sOpenProject = pyqtSignal(str)
-    sRequestPatients = pyqtSignal()
-
     def __init__(self, parent):
         super(Toolbar, self).__init__(parent)
         self.actionsDict = {}  # This is a lookup table to match the buttons to the numbers they got added
@@ -71,86 +62,6 @@ class Toolbar(QToolBar):
             if self.actionGeometry(self.actions()[self.actionsDict["DrawPolygon"]]).contains(event.pos()):
                 # TODO: raise own context menu with options for drawing a circle or a rectangle
                 pass
-
-    def init_actions(self, parent):
-        """Initialise all actions present which can be connected to buttons or menu items"""
-        # TODO: some shortcuts don't work
-        # TODO: Figure out a more modular way to set up these actions
-        action_new_project = Action(parent,
-                                    "New\nProject",
-                                    None,
-                                    'Ctrl+N',
-                                    "new",
-                                    "New project")
-        action_open_project = Action(parent,
-                                     "Open\nProject",
-                                     None,
-                                     'Ctrl+O',
-                                     "open",
-                                     "Open project")
-        action_save = Action(parent,
-                             "Save",
-                             None,
-                             'Ctrl+S',
-                             "save",
-                             "Save current state to database")
-        action_import = Action(parent,
-                               "Import",
-                               None,
-                               'Ctrl+I',
-                               "import",
-                               "Import a new file to database")
-        action_next_image = Action(parent,
-                                   "Next\nImage",
-                                   None,
-                                   'Right',
-                                   "next",
-                                   "Go to next image")
-        action_prev_image = Action(parent,
-                                   "Previous\nImage",
-                                   None,
-                                   'Left',
-                                   "prev",
-                                   "Go to previous image")
-        action_draw_poly = Action(parent,
-                                  "Draw\nPolygon",
-                                  None,
-                                  icon="polygon",
-                                  tip="Draw Polygon (right click to show options)",
-                                  checkable=True)
-        action_trace_outline = Action(parent,
-                                      "Draw\nTrace",
-                                      None,
-                                      icon="outline",
-                                      tip="Trace Outline",
-                                      checkable=True)
-        action_draw_circle = Action(parent,
-                                    "Draw\nCircle",
-                                    None,
-                                    icon="circle",
-                                    tip="Draw Circle",
-                                    checkable=True)
-        action_draw_rectangle = Action(parent,
-                                       "Draw\nRectangle",
-                                       None,
-                                       icon="square",
-                                       tip="Draw Rectangle",
-                                       checkable=True)
-        action_quit = Action(parent,
-                             "Quit\nProgram",
-                             None,
-                             icon="quit",
-                             tip="Quit Program",
-                             checkable=True)
-
-        actions = ((action_draw_poly,
-                    action_trace_outline,
-                    action_draw_circle,
-                    action_draw_rectangle,
-                    action_quit))
-
-        # Init Toolbar
-        self.addActions(actions)
 
     def get_action(self, action_str: str) -> Action:
         if action_str not in self.actionsDict:
