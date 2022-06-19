@@ -46,7 +46,7 @@ class CenterDisplayWidget(QWidget):
     def get_pixmap_dimensions(self):
         return [self.pixmap.pixmap().width(), self.pixmap.pixmap().height()]
 
-    def init_image(self, pixmap: QPixmap, labels):
+    def init_image(self, pixmap: QPixmap):
         self.pixmap.setPixmap(pixmap)
         # self.set_labels(labels)
 
@@ -63,8 +63,11 @@ class CenterDisplayWidget(QWidget):
 
 
 if __name__ == '__main__':
-    test_vid = r"C:\Users\Somers\Desktop\GRK008.MP4"
+    img_1_path = r"C:\Users\SimonDavidKrafft\Pictures\examples\2____z1.0.png"
+    img_2_path = r"C:\Users\SimonDavidKrafft\Pictures\examples\1____z0.0.png"
     app = QApplication(["test"])
-    vid = CenterDisplayWidget()
-    vid.show()
+    reg = CenterDisplayWidget()
+    image = QPixmap(img_1_path)
+    reg.init_image(image)
+    reg.show()
     app.exec_()

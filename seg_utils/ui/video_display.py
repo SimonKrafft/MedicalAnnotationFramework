@@ -133,10 +133,10 @@ class VideoFrameGrabber(QAbstractVideoSurface):
 
 
 if __name__ == '__main__':
-    test_vid = r"C:\Users\Somers\Desktop\GRK008.MP4"
+    test_vid = r"C:\Users\SimonDavidKrafft\Videos\sample-15s.mp4"
     app = QApplication(["test"])
     vid = VideoPlayer()
-    vid.frame_grabbed.connect(lambda x, t: print(f'got frame at time {t}'))
+    # vid.frame_grabbed.connect(lambda x, t: print(f'got frame at time {t}'))
     vid.set_video(test_vid)
     vid.show()
     vid.play()
